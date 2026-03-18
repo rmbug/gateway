@@ -60,6 +60,40 @@ When an engineer connects:
 
 Your database credentials never leave your infrastructure.
 
+## Audit log persistence
+
+The gateway stores audit logs locally using SQLite by default (`/var/lib/rmbug/gateway.db`). **If you don't mount a persistent volume, audit logs are lost when the container restarts.**
+
+There are three ways to make audit logs durable:
+
+**Option 1: Named Docker volume (simplest)**
+```bash
+docker run -d \
+  -e RMBUG_GATEWAY_ACCESS_KEY=rmb_gw_your_key_here \
+  -v rmbug-data:/var/lib/rmbug \         # ← persistent named volume
+  ghcr.io/rmbug/gateway:latest
+```
+
+**Option 2: External PostgreSQL**
+```bash
+docker run -d \
+  -e RMBUG_GATEWAY_ACCESS_KEY=rmb_gw_your_key_here \
+  -e RMBUG_STORAGE_URI=postgres://user:pass@db-host/gateway \
+  ghcr.io/rmbug/gateway:latest
+```
+
+**Option 3: External MySQL**
+```bash
+docker run -d \
+  -e RMBUG_GATEWAY_ACCESS_KEY=rmb_gw_your_key_here \
+  -e RMBUG_STORAGE_URI=mysql://user:pass@db-host/gateway \
+  ghcr.io/rmbug/gateway:latest
+```
+
+PostgreSQL or MySQL are the right choice if you're running multiple gateway replicas — they share a single audit store. SQLite with a persistent volume works fine for a single instance.
+
+Without a persistent store, the gateway still works — engineers can still connect, and connections are still logged in the rmBug control plane. Only the local audit copy is lost on restart.
+
 ## Upgrading
 
 ```bash
