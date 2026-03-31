@@ -58,7 +58,6 @@ When an engineer connects:
 3. The gateway opens a connection to the target database using the stored credentials
 4. Traffic flows transparently in both directions
 
-Your database credentials never leave your infrastructure.
 
 ## Audit log persistence
 
